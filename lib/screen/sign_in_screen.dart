@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phone_auth_using_bloc_futter/screen/verify_phone_number_screen.dart';
+
+import '../cubit/auth_cubit/auth_cubit.dart';
+import '../cubit/auth_cubit/auth_state.dart';
 
 class SignInScreen extends StatelessWidget {
   SignInScreen({super.key});
@@ -33,16 +37,35 @@ class SignInScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return VerifyPhoneNumberScreen();
-                        }));
-                      },
-                      child: const Text("Sign In"),
-                    ),
+                  BlocConsumer<AuthCubit, AuthState>(
+                    listener: (context, state) {
+                      if (state is AuthCodeSentState) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    VerifyPhoneNumberScreen()));
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is AuthLoadingState) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      return SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            String phoneNumber = "+91${phoneController.text}";
+                            BlocProvider.of<AuthCubit>(context)
+                                .sendOTP(phoneNumber);
+                          },
+                          child: const Text("Sign In"),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phone_auth_using_bloc_futter/screen/home_screen.dart';
+
+import '../cubit/auth_cubit/auth_cubit.dart';
+import '../cubit/auth_cubit/auth_state.dart';
 
 class VerifyPhoneNumberScreen extends StatelessWidget {
   VerifyPhoneNumberScreen({super.key});
@@ -32,16 +36,41 @@ class VerifyPhoneNumberScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => HomeScreen()));
-                      },
-                      child: const Text("Verify"),
-                    ),
-                  )
+                  BlocConsumer<AuthCubit, AuthState>(
+                    listener: (context, state) {
+                      if (state is AuthLoggedInState) {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomeScreen()));
+                      } else if (state is AuthErrorState) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(state.error),
+                          duration: const Duration(milliseconds: 2000),
+                        ));
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is AuthLoadingState) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      return SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            BlocProvider.of<AuthCubit>(context)
+                                .verifyOTP(otpController.text);
+                          },
+                          child: const Text("Verify"),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
