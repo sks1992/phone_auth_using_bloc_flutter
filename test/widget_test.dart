@@ -13,7 +13,7 @@ import 'package:phone_auth_using_bloc_futter/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const PhoneAuthApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
